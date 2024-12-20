@@ -20,7 +20,6 @@ describe("Voting", () => {
         logger.info("Aztec-Starter tests running.")
 
         pxe = await setupSandbox();
-        deployInitialTestAccounts(pxe);
 
         wallets = await getInitialTestAccountsWallets(pxe);
         accounts = wallets.map(w => w.getCompleteAddress())
