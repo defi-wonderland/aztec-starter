@@ -28,7 +28,9 @@ jobs:
 
         - name: Get version
           run: |
-            echo "AZTEC_VERSION=$(node ./.github/scripts/fetchRelease.js)" >> "$GITHUB_ENV"
+            RAW_VERSION=$(node ./.github/scripts/fetchRelease.js)
+            AZTEC_VERSION=$(echo "$RAW_VERSION" | sed 's/aztec-packages-v//')
+            echo "AZTEC_VERSION=$AZTEC_VERSION" >> "$GITHUB_ENV"
   
         - name: Set Aztec version and start sandbox
           run: |
