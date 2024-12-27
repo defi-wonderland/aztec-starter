@@ -29,13 +29,11 @@ jobs:
         - name: Get version
           id: versions_step
           run: |
-            version_tag=$(node ./.github/scripts/fetchRelease.js)
-            echo "::set-output name=version_tag::$version_tag"
-            echo "Output from Node.js script: $version_tag"
+            echo "aztec-version=$(node ./.github/scripts/fetchRelease.js)" >> $GITHUB_STATE
   
         - name: Set Aztec version and start sandbox
           run: |
-            VERSION=${{ steps.versions_step.outputs.version_tag }} aztec-up
+            VERSION=$aztec-version aztec-up
             aztec start --sandbox &
   
         - name: Install project dependencies
