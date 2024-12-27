@@ -26,7 +26,7 @@ jobs:
         - name: Update path
           run: echo "/home/runner/.aztec/bin" >> $GITHUB_PATH
 
-        - name: Get version
+        - name: Fetch latest Aztec version
           run: |
             RAW_VERSION=$(node ./.github/scripts/fetchRelease.js)
             AZTEC_VERSION=$(echo "$RAW_VERSION" | sed 's/aztec-packages-v//')
@@ -41,7 +41,7 @@ jobs:
         - name: Install project dependencies
           run: yarn
   
-        - name: Compile, generate code, and run tests
+        - name: Compile
           run: script -e -c "${AZTEC_NARGO:-aztec-nargo} compile"
   
         - name: Codegen
