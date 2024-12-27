@@ -24,10 +24,17 @@ jobs:
   
         - name: Update path
           run: echo "/home/runner/.aztec/bin" >> $GITHUB_PATH
+
+        - name: Get version
+          id: versions_step
+          run: |
+            version_tag=$(node ./.github/scripts/fetchRelease.js)
+            echo "::set-output name=version_tag::$version_tag"
+            echo "Output from Node.js script: $version_tag"
   
         - name: Set Aztec version and start sandbox
           run: |
-            VERSION=0.68.0 aztec-up
+            VERSION=${{ steps.versions_step.outputs.version_tag }} aztec-up
             aztec start --sandbox &
   
         - name: Install project dependencies
