@@ -27,13 +27,10 @@ jobs:
         #   run: echo "/home/runner/.aztec/bin" >> $GITHUB_PATH
 
         - name: Get version
-          id: versions_step
           run: |
-            echo "aztec-version=$(node ./.github/scripts/fetchRelease.js)" >> "$GITHUB_ENV"
+            echo "AZTEC_VERSION=$(node ./.github/scripts/fetchRelease.js)" >> "$GITHUB_ENV"
   
         - name: Set Aztec version and start sandbox
-          env: 
-            AZTEC_VERSION: ${{ steps.versions_step.outputs.aztec-version }}
           run: |
             echo "Using Aztec version: $AZTEC_VERSION"
             VERSION=$AZTEC_VERSION aztec-up
