@@ -15,16 +15,16 @@ jobs:
         - name: Checkout repository
           uses: actions/checkout@v3
   
-        - name: Set up Docker
-          uses: docker/setup-buildx-action@v2
+        # - name: Set up Docker
+        #   uses: docker/setup-buildx-action@v2
   
-        - name: Install Aztec CLI
-          run: |
-            curl -s https://install.aztec.network > tmp.sh
-            bash tmp.sh <<< yes "yes"
+        # - name: Install Aztec CLI
+        #   run: |
+        #     curl -s https://install.aztec.network > tmp.sh
+        #     bash tmp.sh <<< yes "yes"
   
-        - name: Update path
-          run: echo "/home/runner/.aztec/bin" >> $GITHUB_PATH
+        # - name: Update path
+        #   run: echo "/home/runner/.aztec/bin" >> $GITHUB_PATH
 
         - name: Get version
           id: versions_step
@@ -32,8 +32,10 @@ jobs:
             echo "aztec-version=$(node ./.github/scripts/fetchRelease.js)" >> $GITHUB_STATE
   
         - name: Set Aztec version and start sandbox
+          env: 
+            AZTEC_VERSION: ${{ steps.versions_step.outputs.aztec-version }}
           run: |
-            VERSION=$aztec-version aztec-up
+            VERSION=$AZTEC_VERSION aztec-up
             aztec start --sandbox &
   
         - name: Install project dependencies
