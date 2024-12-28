@@ -5,6 +5,7 @@ on:
     pull_request:
       branches:
         - main
+        - dev
   
 jobs:
     setup-and-run:
@@ -24,16 +25,23 @@ jobs:
   
         - name: Update path
           run: echo "/home/runner/.aztec/bin" >> $GITHUB_PATH
+
+        - name: Fetch latest Aztec version
+          run: |
+            RAW_VERSION=$(node ./.github/scripts/fetchRelease.js)
+            AZTEC_VERSION=$(echo "$RAW_VERSION" | sed 's/aztec-packages-v//')
+            echo "AZTEC_VERSION=$AZTEC_VERSION" >> "$GITHUB_ENV"
   
         - name: Set Aztec version and start sandbox
           run: |
-            VERSION=0.68.0 aztec-up
+            echo "Using Aztec version: $AZTEC_VERSION"
+            VERSION=$AZTEC_VERSION aztec-up
             aztec start --sandbox &
   
         - name: Install project dependencies
           run: yarn
   
-        - name: Compile, generate code, and run tests
+        - name: Compile
           run: script -e -c "${AZTEC_NARGO:-aztec-nargo} compile"
   
         - name: Codegen
