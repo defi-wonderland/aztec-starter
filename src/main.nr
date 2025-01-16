@@ -8,7 +8,7 @@ contract EasyPrivateVoting {
         keys::getters::{get_nsk_app, get_public_keys},
         macros::{functions::{initializer, internal, private, public}, storage::storage, notes::note},
         note::{note_interface::NullifiableNote, utils::compute_note_hash_for_nullify},
-        prelude::{AztecAddress, Map, PublicImmutable, PublicMutable, PrivateSet, NoteHeader, NoteGetterOptions},
+        prelude::{AztecAddress, Map, PublicImmutable, PublicMutable, PrivateSet, NoteHeader, NoteGetterOptions, SharedMutable},
         protocol_types::{hash::poseidon2_hash_with_separator, constants::GENERATOR_INDEX__NOTE_NULLIFIER},
         encrypted_logs::encrypted_note_emission::encode_and_encrypt_note,
         utils::comparison::Comparator,
@@ -22,6 +22,8 @@ contract EasyPrivateVoting {
         vote_ended: PublicMutable<bool, Context>, // vote_ended is boolean
         active_at_block: PublicImmutable<u32, Context>, // when people can start voting
         delegations: PrivateSet<DelegateNote, Context>, // set of delegations
+
+        allowed_voters: Map<AztecAddress, SharedMutable<bool, 1, Context>, Context>, // allowed voters
     }
 
     #[note]
@@ -81,9 +83,41 @@ contract EasyPrivateVoting {
         storage.active_at_block.initialize(context.block_number() as u32);
     }
 
+    #[public]
+    fn add_voter(voter: AztecAddress) {
+        assert(storage.admin.read().eq(context.msg_sender()), "Only admin can add voters");
+        storage.allowed_voters.at(voter).schedule_value_change(true);
+    }
+
+    #[public]
+    fn add_voters(voters: [AztecAddress; 32]) {
+        assert(storage.admin.read().eq(context.msg_sender()), "Only admin can add voters");
+        for i in 0..31 {
+            let voter = voters[i];
+            if (!voter.is_zero()) {
+                storage.allowed_voters.at(voter).schedule_value_change(true);
+            }
+        }
+    }
+
+    #[public]
+    fn is_voter_allowed(voter: AztecAddress) -> bool {
+        let allowed = storage.allowed_voters.at(voter).get_current_value();
+        allowed
+    }
+
+    #[contract_library_method]
+    fn _is_voter_allowed(context: &mut PrivateContext, storage: Storage<&mut PrivateContext>) -> bool {
+        let allowed = storage.allowed_voters.at(context.msg_sender()).get_current_value();
+        allowed
+    }
+
     #[private]
     // annotation to mark function as private and expose private context
     fn cast_vote(candidate: Field) {
+
+        assert(_is_voter_allowed(&mut context, storage), "sender is not allowed to vote");
+
         let msg_sender_npk_m_hash = get_public_keys(context.msg_sender()).npk_m.hash();
 
         let secret = context.request_nsk_app(msg_sender_npk_m_hash); // get secret key of caller of function
@@ -97,6 +131,9 @@ contract EasyPrivateVoting {
     #[private]
     // sample method for creating a note for someone else to vote on your behalf
     fn delegate_vote(delegatee: AztecAddress, randomness: Field) {
+
+        assert(_is_voter_allowed(&mut context, storage), "sender is not allowed to vote");
+
         let msg_sender_npk_m_hash = get_public_keys(context.msg_sender()).npk_m.hash();
 
         let secret = context.request_nsk_app(msg_sender_npk_m_hash); // get secret key of caller of function

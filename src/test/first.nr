@@ -1,6 +1,7 @@
 use crate::test::utils;
 use dep::aztec::oracle::{execution::get_block_number, storage::storage_read};
 use dep::aztec::protocol_types::storage::map::derive_storage_slot_in_map;
+use dep::aztec::prelude::{AztecAddress};
 
 use crate::EasyPrivateVoting;
 
@@ -52,11 +53,16 @@ unconstrained fn test_fail_end_vote_by_non_admin() {
 
 #[test]
 unconstrained fn test_cast_vote() {
-    let (env, voting_contract_address, _) = utils::setup();
+    let (env, voting_contract_address, admin) = utils::setup();
     let alice = env.create_account();
-    env.impersonate(alice);
+
+    env.impersonate(admin);
+    EasyPrivateVoting::at(voting_contract_address).add_voter(alice).call(&mut env.public());
+    env.advance_block_by(1);
+
 
     let candidate = 1;
+    env.impersonate(alice);
     env.advance_block_by(6);
     EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 
@@ -71,9 +77,14 @@ unconstrained fn test_cast_vote() {
 
 #[test]
 unconstrained fn test_cast_vote_with_separate_accounts() {
-    let (env, voting_contract_address, _) = utils::setup();
+    let (env, voting_contract_address, admin) = utils::setup();
     let alice = env.create_account();
     let bob = env.create_account();
+
+    env.impersonate(admin);
+    EasyPrivateVoting::at(voting_contract_address).add_voter(alice).call(&mut env.public());
+    EasyPrivateVoting::at(voting_contract_address).add_voter(bob).call(&mut env.public());
+    env.advance_block_by(1);
 
     let candidate = 101;
 
@@ -96,13 +107,18 @@ unconstrained fn test_cast_vote_with_separate_accounts() {
 
 #[test]
 unconstrained fn test_cast_vote_with_delegation() {
-    let (env, voting_contract_address, _) = utils::setup();
+    let (env, voting_contract_address, admin) = utils::setup();
     let alice = env.create_account();
     let bob = env.create_account();
 
     let candidate = 101;
     let random = 420;
     
+    env.impersonate(admin);
+    EasyPrivateVoting::at(voting_contract_address).add_voter(alice).call(&mut env.public());
+    env.advance_block_by(1);
+
+
     env.impersonate(alice);
     env.advance_block_by(1);
     EasyPrivateVoting::at(voting_contract_address).delegate_vote(bob, random).call(&mut env.private());
@@ -122,7 +138,7 @@ unconstrained fn test_cast_vote_with_delegation() {
 
 #[test]
 unconstrained fn test_cast_vote_with_multiple_delegations() {
-    let (env, voting_contract_address, _) = utils::setup();
+    let (env, voting_contract_address, admin) = utils::setup();
     let alice = env.create_account();
     let bob = env.create_account();
     let carl = env.create_account();
@@ -132,6 +148,20 @@ unconstrained fn test_cast_vote_with_multiple_delegations() {
     let candidate = 101;
     let random = 420;
     
+    env.impersonate(admin);
+    // EasyPrivateVoting::at(voting_contract_address).add_voter(alice).call(&mut env.public());
+    // EasyPrivateVoting::at(voting_contract_address).add_voter(bob).call(&mut env.public());
+    // EasyPrivateVoting::at(voting_contract_address).add_voter(carl).call(&mut env.public());
+    // EasyPrivateVoting::at(voting_contract_address).add_voter(dave).call(&mut env.public());
+    let mut voters = [AztecAddress::zero(); 32];
+    voters[0] = alice;
+    voters[1] = bob;
+    voters[2] = carl;
+    voters[3] = dave;
+    EasyPrivateVoting::at(voting_contract_address).add_voters(voters).call(&mut env.public());
+    env.advance_block_by(3);
+
+
     env.impersonate(alice);
     env.advance_block_by(1);
     EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(&mut env.private());
@@ -221,4 +251,51 @@ unconstrained fn test_fail_vote_and_delegate() {
     // Delegate vote as alice
     env.advance_block_by(1);
     EasyPrivateVoting::at(voting_contract_address).delegate_vote(bob, random).call(&mut env.private());
+}
+
+#[test(should_fail)]
+unconstrained fn test_fail_non_allowed_voter() {
+    let (env, voting_contract_address, _) = utils::setup();
+    let alice = env.create_account();
+    let bob = env.create_account();
+
+    let candidate = 101;
+    let random = 420;
+
+    env.impersonate(alice);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
+
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).delegate_vote(bob, random).call(&mut env.private());
+}
+
+#[test]
+unconstrained fn test_add_voter() {
+    let (env, voting_contract_address, admin) = utils::setup();
+    let alice = env.create_account();
+
+    env.impersonate(admin);
+    EasyPrivateVoting::at(voting_contract_address).add_voter(alice).call(&mut env.public());
+    env.advance_block_by(1);
+
+    assert(EasyPrivateVoting::at(voting_contract_address).is_voter_allowed(alice).call(&mut env.public()));
+}
+
+#[test]
+unconstrained fn test_add_voters() {
+    let (env, voting_contract_address, admin) = utils::setup();
+
+    let mut voters = [AztecAddress::zero(); 32];
+    for i in 0..3 {
+        voters[i] = env.create_account();
+    }
+
+    env.impersonate(admin);
+    EasyPrivateVoting::at(voting_contract_address).add_voters(voters).call(&mut env.public());
+    env.advance_block_by(1);
+
+    for i in 0..3 {
+        assert(EasyPrivateVoting::at(voting_contract_address).is_voter_allowed(voters[i]).call(&mut env.public()));
+    }
 }
