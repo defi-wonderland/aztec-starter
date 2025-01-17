@@ -1,8 +1,4 @@
-use dep::aztec::{
-    note::{note_getter::{MAX_NOTES_PER_PAGE, view_notes}, note_viewer_options::NoteViewerOptions},
-    prelude::AztecAddress, protocol_types::storage::map::derive_storage_slot_in_map,
-    test::helpers::test_environment::TestEnvironment,
-};
+use dep::aztec::{prelude::AztecAddress, test::helpers::test_environment::TestEnvironment};
 use dep::token::Token;
 
 use crate::EasyPrivateVoting;

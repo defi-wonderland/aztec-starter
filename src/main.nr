@@ -14,10 +14,12 @@ contract EasyPrivateVoting {
         },
         protocol_types::{
             hash::poseidon2_hash_with_separator, constants::GENERATOR_INDEX__NOTE_NULLIFIER,
+            traits::{FromField, ToField, Hash},
         }, encrypted_logs::encrypted_note_emission::encode_and_encrypt_note,
         utils::comparison::Comparator,
     };
     use dep::token::Token;
+
     #[storage]
     struct Storage<Context> {
         admin: PublicMutable<AztecAddress, Context>, // admin can end vote
