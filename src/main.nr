@@ -1,57 +1,84 @@
+mod types;
 mod test;
 use dep::aztec::macros::aztec;
 
 #[aztec]
-contract EasyPrivateVoting {
-    use dep::aztec::{
-        keys::getters::get_public_keys,
-        macros::{functions::{initializer, internal, private, public}, storage::storage},
-    };
-    use dep::aztec::prelude::{AztecAddress, Map, PublicImmutable, PublicMutable};
+contract UIntBenchmark {
+    use dep::aztec::macros::{functions::{initializer, internal, private, public}, storage::storage};
+    use dep::aztec::prelude::{AztecAddress, PrivateMutable, PublicMutable};
+
+    use crate::types::u64note::U64Note;
+    use uint253::uint253_note::{U253, U253Note};
+    use uint_note::uint_note::UintNote;
+
+    // use bignum::{BigNum, BigNumTrait};
+    // type U256 = BigNum<3, 257, bignum::fields::U256::U256Params>;
+
     #[storage]
     struct Storage<Context> {
-        admin: PublicMutable<AztecAddress, Context>, // admin can end vote
-        tally: Map<Field, PublicMutable<Field, Context>, Context>, // we will store candidate as key and number of votes as value
-        vote_ended: PublicMutable<bool, Context>, // vote_ended is boolean
-        active_at_block: PublicImmutable<u32, Context>, // when people can start voting
+        u64_private: PrivateMutable<U64Note, Context>,
+        u128_private: PrivateMutable<UintNote, Context>,
+        u253_private: PrivateMutable<U253Note, Context>,
+        // u256_private: PrivateMutable<U256, Context>,
+
+        u64_public: PublicMutable<u64, Context>,
+        u128_public: PublicMutable<U128, Context>,
+        u253_public: PublicMutable<U253, Context>,
     }
 
     #[public]
     #[initializer]
     // annotation to mark function as a constructor
-    fn constructor(admin: AztecAddress) {
-        storage.admin.write(admin);
-        storage.vote_ended.write(false);
-        storage.active_at_block.initialize(context.block_number() as u32);
+    fn constructor() {
+        storage.u64_public.write(0 as u64);
+        storage.u128_public.write(U128::from_integer(0));
+        storage.u253_public.write(U253::new(0));
     }
 
     #[private]
-    // annotation to mark function as private and expose private context
-    fn cast_vote(candidate: Field) {
-        let msg_sender_npk_m_hash = get_public_keys(context.msg_sender()).npk_m.hash();
+    fn priv_fn_64(number: Field) {
+        let owner = AztecAddress::zero();
+        let mut new_note = U64Note::new(number as u64, owner);
+        storage.u64_private.initialize_or_replace(&mut new_note);
+        UIntBenchmark::at(context.this_address()).pub_fn_64(number as u64).enqueue(&mut context);
+    }
 
-        let secret = context.request_nsk_app(msg_sender_npk_m_hash); // get secret key of caller of function
-        let nullifier = std::hash::pedersen_hash([context.msg_sender().to_field(), secret]); // derive nullifier from sender and secret
-        context.push_nullifier(nullifier);
-        EasyPrivateVoting::at(context.this_address()).add_to_tally_public(candidate).enqueue(
+    #[private]
+    fn priv_fn_128(number: Field) {
+        let owner = AztecAddress::zero();
+        let mut new_note = UintNote::new(U128::from_integer(number), owner);
+        storage.u128_private.initialize_or_replace(&mut new_note);
+        UIntBenchmark::at(context.this_address()).pub_fn_128(U128::from_integer(number)).enqueue(
             &mut context,
         );
     }
 
-    #[public]
-    #[internal]
-    fn add_to_tally_public(candidate: Field) {
-        assert(storage.vote_ended.read() == false, "Vote has ended"); // assert that vote has not ended
-        let new_tally = storage.tally.at(candidate).read() + 1;
-        storage.tally.at(candidate).write(new_tally);
+    #[private]
+    fn priv_fn_253(number: Field) {
+        let owner = AztecAddress::zero();
+        let mut new_note = U253Note::new(U253::from_integer(number), owner);
+        storage.u253_private.initialize_or_replace(&mut new_note);
+        UIntBenchmark::at(context.this_address()).pub_fn_253(U253::from_integer(number)).enqueue(
+            &mut context,
+        );
     }
 
+    #[internal]
     #[public]
-    fn end_vote() {
-        assert(storage.admin.read().eq(context.msg_sender()), "Only admin can end votes"); // assert that caller is admin
-        storage.vote_ended.write(true);
+    fn pub_fn_64(number: u64) {
+        storage.u64_public.write(number);
     }
-    unconstrained fn get_vote(candidate: Field) -> pub Field {
-        storage.tally.at(candidate).read()
+
+    #[internal]
+    #[public]
+    fn pub_fn_128(number: U128) {
+        storage.u128_public.write(number);
     }
+
+    #[internal]
+    #[public]
+    fn pub_fn_253(number: U253) {
+        storage.u253_public.write(number);
+    }
+
 }

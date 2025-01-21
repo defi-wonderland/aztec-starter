@@ -6,3 +6,6 @@ compiler_version = ">=0.18.0"
 
 [dependencies]
 aztec = { git = "https://github.com/AztecProtocol/aztec-packages/", tag = "aztec-packages-v0.71.0", directory = "noir-projects/aztec-nr/aztec" }
+uint_note = { git = "https://github.com/AztecProtocol/aztec-packages/", tag = "aztec-packages-v0.71.0", directory = "noir-projects/aztec-nr/uint-note" }
+bignum = { git = "https://github.com/olehmisar/noir-bignum", tag = "v0.5.0" }
+uint253 = {git = "https://github.com/ClarifiedLabs/aztec-uint253", tag = "v0.0.1" }
