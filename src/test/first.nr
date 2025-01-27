@@ -71,7 +71,7 @@ unconstrained fn test_cast_vote() {
     let balances_owner_slot =
         derive_storage_slot_in_map(Token::storage_layout().balances.slot, alice);
 
-    Token::at(token_contract_address).mint_to_private(admin, alice, 100).call(&mut env.private());
+    Token::at(token_contract_address).mint_to_private(admin, alice, U128::from_integer(100)).call(&mut env.private());
 
     env.add_note(
         &mut UintNote {
@@ -310,7 +310,7 @@ fn prepare_authwit(
 ) {
     // NOTE: prepares authwit
     let transfer_private_from_call_interface =
-        Token::at(token).transfer_in_private(owner, owner, amount, nonce);
+        Token::at(token).transfer_in_private(owner, owner, U128::from_field(amount), nonce);
     authwit_cheatcodes::add_private_authwit_from_call_interface(
         owner,
         caller,

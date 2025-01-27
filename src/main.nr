@@ -121,7 +121,7 @@ contract EasyPrivateVoting {
             .transfer_in_private(
                 from,
                 from,
-                optimistic_token_balance.to_field(),
+                optimistic_token_balance,
                 Field::from_field(0), // NOTE: hardcoding 0 as nonce for now
             )
             .call(context);

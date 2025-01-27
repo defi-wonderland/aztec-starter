@@ -49,14 +49,14 @@ describe("Voting", () => {
         const [deployerWallet, adminWallet] = wallets; // using first account as deployer and second as contract admin
         const adminAddress = adminWallet.getCompleteAddress().address;
 
-        const deploymentData = getContractInstanceFromDeployParams(VotingContractArtifact,
+        const deploymentData = await getContractInstanceFromDeployParams(VotingContractArtifact,
             {
-                constructorArgs: [adminAddress],
+                constructorArgs: [adminAddress, tokenContract.address],
                 salt,
                 deployer: deployerWallet.getAddress()
             });
         const deployer = new ContractDeployer(VotingContractArtifact, deployerWallet);
-        const tx = deployer.deploy(adminAddress).send({ contractAddressSalt: salt })
+        const tx = deployer.deploy(adminAddress, tokenContract.address).send({ contractAddressSalt: salt })
         const receipt = await tx.getReceipt();
 
         expect(receipt).toEqual(
