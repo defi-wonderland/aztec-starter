@@ -1,7 +1,4 @@
-use dep::aztec::{
-    prelude::AztecAddress,
-    test::helpers::test_environment::TestEnvironment,
-};
+use dep::aztec::{prelude::AztecAddress, test::helpers::test_environment::TestEnvironment};
 use dep::token::Token;
 
 use crate::EasyPrivateVoting;

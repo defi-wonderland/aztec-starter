@@ -4,18 +4,24 @@ use dep::aztec::macros::aztec;
 #[aztec]
 contract EasyPrivateVoting {
     use dep::aztec::{
-        context::PrivateContext, keys::getters::{get_nsk_app, get_public_keys},
+        context::PrivateContext,
+        encrypted_logs::encrypted_note_emission::encode_and_encrypt_note,
+        keys::getters::{get_nsk_app, get_public_keys},
         macros::{
-            functions::{initializer, internal, private, public}, storage::storage, notes::note,
-        }, note::{note_interface::NullifiableNote, utils::compute_note_hash_for_nullify},
+            functions::{initializer, internal, private, public},
+            notes::note,
+            storage::storage,
+        },
+        note::{note_interface::NullifiableNote, utils::compute_note_hash_for_nullify},
         prelude::{
-            AztecAddress, Map, PublicImmutable, PublicMutable, PrivateSet, NoteHeader,
-            NoteGetterOptions,
+            AztecAddress, Map, NoteGetterOptions, NoteHeader, PrivateSet, PublicImmutable,
+            PublicMutable,
         },
         protocol_types::{
-            hash::poseidon2_hash_with_separator, constants::GENERATOR_INDEX__NOTE_NULLIFIER,
-            traits::{FromField, ToField, Hash},
-        }, encrypted_logs::encrypted_note_emission::encode_and_encrypt_note,
+            constants::GENERATOR_INDEX__NOTE_NULLIFIER,
+            hash::poseidon2_hash_with_separator,
+            traits::{FromField, Hash, ToField},
+        },
         utils::comparison::Comparator,
     };
     use dep::token::Token;

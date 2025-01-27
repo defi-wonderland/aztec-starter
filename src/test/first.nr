@@ -1,9 +1,9 @@
 use crate::test::utils;
-use dep::aztec::oracle::{execution::get_block_number, storage::storage_read};
-use dep::aztec::protocol_types::storage::map::derive_storage_slot_in_map;
-use dep::aztec::prelude::{AztecAddress, NoteHeader};
-use dep::token::Token;
 use dep::authwit::cheatcodes as authwit_cheatcodes;
+use dep::aztec::oracle::{execution::get_block_number, storage::storage_read};
+use dep::aztec::prelude::{AztecAddress, NoteHeader};
+use dep::aztec::protocol_types::storage::map::derive_storage_slot_in_map;
+use dep::token::Token;
 use dep::uint_note::uint_note::UintNote;
 
 use std::test::OracleMock;
@@ -71,7 +71,9 @@ unconstrained fn test_cast_vote() {
     let balances_owner_slot =
         derive_storage_slot_in_map(Token::storage_layout().balances.slot, alice);
 
-    Token::at(token_contract_address).mint_to_private(admin, alice, U128::from_integer(100)).call(&mut env.private());
+    Token::at(token_contract_address).mint_to_private(admin, alice, U128::from_integer(100)).call(
+        &mut env.private(),
+    );
 
     env.add_note(
         &mut UintNote {
