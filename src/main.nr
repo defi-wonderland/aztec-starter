@@ -119,7 +119,7 @@ contract EasyPrivateVoting {
 
         // unsafe {
         // NOTE: unconstrained call!
-        let optimistic_token_balance = U128::from_field(100); // NOTE: hardcoding 100 as token balance for now
+        let optimistic_token_balance = U128::from_integer(100); // NOTE: hardcoding 100 as token balance for now
         //  = oracle::get_token_balance(token_address, from);
         // }
         // verify that the token balance is correct

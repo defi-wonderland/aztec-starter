@@ -71,13 +71,15 @@ unconstrained fn test_cast_vote() {
     let balances_owner_slot =
         derive_storage_slot_in_map(Token::storage_layout().balances.slot, alice);
 
-    Token::at(token_contract_address).mint_to_private(admin, alice, U128::from_integer(100)).call(
+    env.impersonate(admin);
+    Token::at(token_contract_address).mint_to_private(alice, alice, U128::from_integer(101)).call(
         &mut env.private(),
     );
+    env.advance_block_by(1);
 
     env.add_note(
         &mut UintNote {
-            value: U128::from_integer(100),
+            value: U128::from_integer(101),
             owner: alice,
             randomness: note_randomness,
             header: NoteHeader::empty(),
@@ -85,6 +87,7 @@ unconstrained fn test_cast_vote() {
         balances_owner_slot,
         token_contract_address,
     );
+    env.advance_block_by(1);
 
     prepare_authwit(
         token_contract_address,
@@ -93,6 +96,7 @@ unconstrained fn test_cast_vote() {
         100,
         0,
     );
+
     // NOTE: failing (see #8771)
     // check_private_balance(token_contract_address, alice, 100);
     let candidate = 1;

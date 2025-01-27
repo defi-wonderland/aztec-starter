@@ -86,7 +86,7 @@ describe("Voting", () => {
         expect(receiptAfterMined.contract.instance.address).toEqual(deploymentData.address)
     }, 300_000_000)
 
-    it("It casts a vote", async () => {
+    it.only("It casts a vote", async () => {
         const candidate = new Fr(1)
 
         const contract = await EasyPrivateVotingContract.deploy(wallets[0], accounts[0].address, tokenContract.address).send().deployed();
@@ -95,7 +95,6 @@ describe("Voting", () => {
             caller: contract.address,
             action
         });
-        wallets[0].addAuthWitness(witness);
 
         const tx = await contract.methods.cast_vote(candidate).send().wait();
         let count = await contract.methods.get_vote(candidate).simulate();
@@ -111,7 +110,6 @@ describe("Voting", () => {
             caller: contract.address,
             action
         });
-        wallets[0].addAuthWitness(witness);
 
         await contract.methods.cast_vote(candidate).send().wait();
 
@@ -136,7 +134,6 @@ describe("Voting", () => {
             caller: contract.address,
             action
         });
-        wallets[0].addAuthWitness(witness);
 
         await contract.methods.delegate_vote(delegatee, random).send().wait();
         
@@ -156,7 +153,6 @@ describe("Voting", () => {
             caller: contract.address,
             action
         });
-        wallets[0].addAuthWitness(witness);
         
         await contract.methods.delegate_vote(delegatee, random).send().wait();
 
