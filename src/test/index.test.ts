@@ -86,7 +86,7 @@ describe("Voting", () => {
         expect(receiptAfterMined.contract.instance.address).toEqual(deploymentData.address)
     }, 300_000_000)
 
-    it.only("It casts a vote", async () => {
+    it("It casts a vote", async () => {
         const candidate = new Fr(1)
 
         const contract = await EasyPrivateVotingContract.deploy(wallets[0], accounts[0].address, tokenContract.address).send().deployed();

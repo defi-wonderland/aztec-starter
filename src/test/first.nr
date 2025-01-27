@@ -77,18 +77,6 @@ unconstrained fn test_cast_vote() {
     );
     env.advance_block_by(1);
 
-    env.add_note(
-        &mut UintNote {
-            value: U128::from_integer(101),
-            owner: alice,
-            randomness: note_randomness,
-            header: NoteHeader::empty(),
-        },
-        balances_owner_slot,
-        token_contract_address,
-    );
-    env.advance_block_by(1);
-
     prepare_authwit(
         token_contract_address,
         voting_contract_address,
