@@ -60,11 +60,11 @@ unconstrained fn test_initializer() {
 //     EasyPrivateVoting::at(voting_contract_address).end_vote().call(&mut env.public());
 // }
 
-// NOTE: failing with "Balance too low" error
 #[test]
 unconstrained fn test_cast_vote() {
     let (env, voting_contract_address, token_contract_address, _) = utils::setup();
     let alice = env.create_account_contract(1);
+    env.advance_block_by(1);
 
     Token::at(token_contract_address).mint_to_private(alice, alice, U128::from_integer(100)).call(
         &mut env.private(),
@@ -80,7 +80,6 @@ unconstrained fn test_cast_vote() {
     );
     env.advance_block_by(1);
 
-    // NOTE: failing (see #8771)
     let candidate = 1;
     env.impersonate(alice);
     EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
