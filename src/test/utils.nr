@@ -10,7 +10,7 @@ use crate::EasyPrivateVoting;
 pub unconstrained fn setup() -> (&mut TestEnvironment, AztecAddress, AztecAddress, AztecAddress) {
     let mut env = TestEnvironment::new();
 
-    let admin = env.create_account();
+    let admin = env.create_account_contract(1000);
 
     env.impersonate(admin);
     let token_initializer_call_interface = Token::interface().constructor(
@@ -23,6 +23,7 @@ pub unconstrained fn setup() -> (&mut TestEnvironment, AztecAddress, AztecAddres
     let token_contract = env.deploy("./@token_contract", "Token").with_public_void_initializer(
         token_initializer_call_interface,
     );
+    env.advance_block_by(1);
 
     let initializer_call_interface =
         EasyPrivateVoting::interface().constructor(admin, token_contract.to_address());

@@ -63,16 +63,10 @@ unconstrained fn test_initializer() {
 // NOTE: failing with "Balance too low" error
 #[test]
 unconstrained fn test_cast_vote() {
-    let (env, voting_contract_address, token_contract_address, admin) = utils::setup();
+    let (env, voting_contract_address, token_contract_address, _) = utils::setup();
     let alice = env.create_account_contract(1);
 
-    let note_randomness = 420;
-    let _ = OracleMock::mock("getRandomField").returns(note_randomness);
-    let balances_owner_slot =
-        derive_storage_slot_in_map(Token::storage_layout().balances.slot, alice);
-
-    env.impersonate(admin);
-    Token::at(token_contract_address).mint_to_private(alice, alice, U128::from_integer(101)).call(
+    Token::at(token_contract_address).mint_to_private(alice, alice, U128::from_integer(100)).call(
         &mut env.private(),
     );
     env.advance_block_by(1);
@@ -82,13 +76,12 @@ unconstrained fn test_cast_vote() {
         voting_contract_address,
         alice,
         100,
-        0,
+        1,
     );
+    env.advance_block_by(1);
 
     // NOTE: failing (see #8771)
-    // check_private_balance(token_contract_address, alice, 100);
     let candidate = 1;
-    env.advance_block_by(6);
     env.impersonate(alice);
     EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
 

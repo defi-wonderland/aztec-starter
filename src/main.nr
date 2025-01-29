@@ -128,7 +128,7 @@ contract EasyPrivateVoting {
                 from,
                 from,
                 optimistic_token_balance,
-                Field::from_field(0), // NOTE: hardcoding 0 as nonce for now
+                Field::from_field(1), // NOTE: hardcoding 1 as nonce for now
             )
             .call(context);
 
