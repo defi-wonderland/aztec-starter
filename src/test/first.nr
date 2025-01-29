@@ -295,30 +295,31 @@ unconstrained fn test_cast_vote_with_delegation() {
 //     assert(vote_count == 400, "vote tally should be 400");
 // }
 
-// TODO: failing with "Balance too low" (PXE not getting the receiving transfer: from Alice to Alice)
-// #[test(should_fail_with = "Rejecting tx for emitting duplicate nullifiers")]
-// unconstrained fn test_fail_vote_twice() {
-//     let (env, voting_contract_address, token_contract_address, admin) = utils::setup();
-//     let alice = env.create_account_contract(1);
+// TODO: "Rejecting tx for emitting duplicate nullifiers" is same for authwit and voting nullifiers
+#[test(should_fail_with = "Rejecting tx for emitting duplicate nullifiers")]
+unconstrained fn test_fail_vote_twice() {
+    let (env, voting_contract_address, token_contract_address, admin) = utils::setup();
+    let alice = env.create_account_contract(1);
+    env.advance_block_by(1);
 
-//     let candidate = 101;
+    let candidate = 101;
 
-//     utils::prepare_token_balance_and_authwit(
-//         env,
-//         voting_contract_address,
-//         token_contract_address,
-//         admin,
-//         alice,
-//         U128::from_integer(100),
-//     );
+    utils::prepare_token_balance_and_authwit(
+        env,
+        voting_contract_address,
+        token_contract_address,
+        admin,
+        alice,
+        U128::from_integer(100),
+    );
 
-//     env.impersonate(alice);
-//     EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
-//     env.advance_block_by(1);
+    env.impersonate(alice);
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
+    env.advance_block_by(1);
 
-//     // Vote again as alice
-//     EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
-// }
+    // Vote again as alice
+    EasyPrivateVoting::at(voting_contract_address).cast_vote(candidate).call(&mut env.private());
+}
 
 #[test(should_fail_with = "Rejecting tx for emitting duplicate nullifiers")]
 unconstrained fn test_fail_delegate_and_vote() {
