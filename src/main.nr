@@ -113,7 +113,7 @@ contract EasyPrivateVoting {
             .enqueue(&mut context);
     }
 
-    #[contract_library_method] // TODO: what's the effect of this tag?
+    #[contract_library_method]
     fn get_token_balance(from: AztecAddress, context: &mut PrivateContext) -> Field {
         let storage = Storage::init(context);
 
@@ -159,14 +159,19 @@ contract EasyPrivateVoting {
     }
 
     #[private]
-    // TODO: fix to read the value of the delegations
     fn cast_delegated_vote(candidate: Field) {
         let mut options = NoteGetterOptions::new();
         options = options
             .select(DelegateNote::properties().delegatee, Comparator.EQ, context.msg_sender())
             .set_limit(3); // low limit for testing purposes
-        let popped_notes = storage.delegations.pop_notes(options);
-        let num_delegated_votes = popped_notes.len() as Field;
+        let notes = storage.delegations.pop_notes(options);
+        let mut num_delegated_votes = Field::from_field(0);
+        for i in 0..options.limit {
+            if i < notes.len() {
+                let note = notes.get_unchecked(i);
+                num_delegated_votes = num_delegated_votes + note.amount;
+            }
+        }
 
         EasyPrivateVoting::at(context.this_address())
             .add_to_tally_public(candidate, num_delegated_votes)

@@ -193,107 +193,106 @@ unconstrained fn test_cast_vote_with_delegation() {
     assert(vote_count == 100, "vote tally should be 100");
 }
 
-// TODO: failing because delegations are hardcoded to 1 vote per delegation (not balance)
-// #[test]
-// unconstrained fn test_cast_vote_with_multiple_delegations() {
-//     let (env, voting_contract_address, token_contract_address, admin) = utils::setup();
-//     let alice = env.create_account_contract(1);
-//     env.advance_block_by(1);
-//     let bob = env.create_account_contract(2);
-//     env.advance_block_by(1);
-//     let carl = env.create_account_contract(3);
-//     env.advance_block_by(1);
-//     let dave = env.create_account_contract(4);
-//     env.advance_block_by(1);
-//     let delegatee = env.create_account();
+#[test]
+unconstrained fn test_cast_vote_with_multiple_delegations() {
+    let (env, voting_contract_address, token_contract_address, admin) = utils::setup();
+    let alice = env.create_account_contract(1);
+    env.advance_block_by(1);
+    let bob = env.create_account_contract(2);
+    env.advance_block_by(1);
+    let carl = env.create_account_contract(3);
+    env.advance_block_by(1);
+    let dave = env.create_account_contract(4);
+    env.advance_block_by(1);
+    let delegatee = env.create_account();
 
-//     let candidate = 101;
-//     let random = 420;
+    let candidate = 101;
+    let random = 420;
 
-//     utils::prepare_token_balance_and_authwit(
-//         env,
-//         voting_contract_address,
-//         token_contract_address,
-//         admin,
-//         alice,
-//         U128::from_integer(100),
-//     );
-//     utils::prepare_token_balance_and_authwit(
-//         env,
-//         voting_contract_address,
-//         token_contract_address,
-//         admin,
-//         bob,
-//         U128::from_integer(100),
-//     );
-//     utils::prepare_token_balance_and_authwit(
-//         env,
-//         voting_contract_address,
-//         token_contract_address,
-//         admin,
-//         carl,
-//         U128::from_integer(100),
-//     );
-//     utils::prepare_token_balance_and_authwit(
-//         env,
-//         voting_contract_address,
-//         token_contract_address,
-//         admin,
-//         dave,
-//         U128::from_integer(100),
-//     );
+    utils::prepare_token_balance_and_authwit(
+        env,
+        voting_contract_address,
+        token_contract_address,
+        admin,
+        alice,
+        U128::from_integer(100),
+    );
+    utils::prepare_token_balance_and_authwit(
+        env,
+        voting_contract_address,
+        token_contract_address,
+        admin,
+        bob,
+        U128::from_integer(100),
+    );
+    utils::prepare_token_balance_and_authwit(
+        env,
+        voting_contract_address,
+        token_contract_address,
+        admin,
+        carl,
+        U128::from_integer(100),
+    );
+    utils::prepare_token_balance_and_authwit(
+        env,
+        voting_contract_address,
+        token_contract_address,
+        admin,
+        dave,
+        U128::from_integer(100),
+    );
 
-//     env.impersonate(alice);
-//     env.advance_block_by(1);
-//     EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
-//         &mut env.private(),
-//     );
+    env.impersonate(alice);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
+        &mut env.private(),
+    );
 
-//     env.impersonate(bob);
-//     env.advance_block_by(1);
-//     EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
-//         &mut env.private(),
-//     );
+    env.impersonate(bob);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
+        &mut env.private(),
+    );
 
-//     env.impersonate(carl);
-//     env.advance_block_by(1);
-//     EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
-//         &mut env.private(),
-//     );
+    env.impersonate(carl);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
+        &mut env.private(),
+    );
 
-//     // NOTE: the limit of delegations per `cast_delegated_vote` is set to 3
-//     env.impersonate(dave);
-//     env.advance_block_by(1);
-//     EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
-//         &mut env.private(),
-//     );
+    // NOTE: the limit of delegations per `cast_delegated_vote` is set to 3
+    env.impersonate(dave);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).delegate_vote(delegatee, random).call(
+        &mut env.private(),
+    );
 
-//     env.impersonate(delegatee);
-//     env.advance_block_by(1);
-//     EasyPrivateVoting::at(voting_contract_address).cast_delegated_vote(candidate).call(
-//         &mut env.private(),
-//     );
+    env.impersonate(delegatee);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).cast_delegated_vote(candidate).call(
+        &mut env.private(),
+    );
 
-//     // Read vote count from storage
-//     let mut block_number = get_block_number();
-//     let tally_slot = EasyPrivateVoting::storage_layout().tally.slot;
-//     let candidate_tally_slot = derive_storage_slot_in_map(tally_slot, candidate);
-//     let mut vote_count: u32 =
-//         storage_read(voting_contract_address, candidate_tally_slot, block_number);
+    // Read vote count from storage
+    let mut block_number = get_block_number();
+    let tally_slot = EasyPrivateVoting::storage_layout().tally.slot;
+    let candidate_tally_slot = derive_storage_slot_in_map(tally_slot, candidate);
+    let mut vote_count: u32 =
+        storage_read(voting_contract_address, candidate_tally_slot, block_number);
 
-//     assert(vote_count == 300, "vote tally should be 300");
+    assert(vote_count == 300, "vote tally should be 300");
 
-//     env.impersonate(delegatee);
-//     env.advance_block_by(1);
-//     EasyPrivateVoting::at(voting_contract_address).cast_delegated_vote(candidate).call(
-//         &mut env.private(),
-//     );
+    env.impersonate(delegatee);
+    env.advance_block_by(1);
+    EasyPrivateVoting::at(voting_contract_address).cast_delegated_vote(candidate).call(
+        &mut env.private(),
+    );
 
-//     block_number = get_block_number();
-//     vote_count = storage_read(voting_contract_address, candidate_tally_slot, block_number);
+    block_number = get_block_number();
+    vote_count = storage_read(voting_contract_address, candidate_tally_slot, block_number);
 
-//     assert(vote_count == 400, "vote tally should be 400");
-// }
+    assert(vote_count == 400, "vote tally should be 400");
+}
 
 // TODO: "Rejecting tx for emitting duplicate nullifiers" is same for authwit and voting nullifiers
 #[test(should_fail_with = "Rejecting tx for emitting duplicate nullifiers")]
