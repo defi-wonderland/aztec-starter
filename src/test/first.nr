@@ -1,12 +1,6 @@
 use crate::test::utils;
-use dep::authwit::cheatcodes as authwit_cheatcodes;
 use dep::aztec::oracle::{execution::get_block_number, storage::storage_read};
-use dep::aztec::prelude::{AztecAddress, NoteHeader};
 use dep::aztec::protocol_types::storage::map::derive_storage_slot_in_map;
-use dep::token::Token;
-use dep::uint_note::uint_note::UintNote;
-
-use std::test::OracleMock;
 
 use crate::EasyPrivateVoting;
 
@@ -62,23 +56,11 @@ unconstrained fn test_initializer() {
 
 #[test]
 unconstrained fn test_cast_vote() {
-    let (env, voting_contract_address, token_contract_address, _) = utils::setup();
+    let (env, voting_contract_address, token_contract_address, admin) = utils::setup();
     let alice = env.create_account_contract(1);
     env.advance_block_by(1);
 
-    Token::at(token_contract_address).mint_to_private(alice, alice, U128::from_integer(100)).call(
-        &mut env.private(),
-    );
-    env.advance_block_by(1);
-
-    prepare_authwit(
-        token_contract_address,
-        voting_contract_address,
-        alice,
-        100,
-        1,
-    );
-    env.advance_block_by(1);
+    utils::prepare_token_balance_and_authwit(env, voting_contract_address, token_contract_address, admin, alice, U128::from_integer(100));
 
     let candidate = 1;
     env.impersonate(alice);
@@ -286,20 +268,3 @@ unconstrained fn test_cast_vote() {
 //     env.advance_block_by(1);
 //     EasyPrivateVoting::at(voting_contract_address).delegate_vote(bob, random).call(&mut env.private());
 // }
-
-fn prepare_authwit(
-    token: AztecAddress,
-    caller: AztecAddress,
-    owner: AztecAddress,
-    amount: Field,
-    nonce: Field,
-) {
-    // NOTE: prepares authwit
-    let transfer_private_from_call_interface =
-        Token::at(token).transfer_in_private(owner, owner, U128::from_field(amount), nonce);
-    authwit_cheatcodes::add_private_authwit_from_call_interface(
-        owner,
-        caller,
-        transfer_private_from_call_interface,
-    );
-}
