@@ -159,6 +159,7 @@ contract EasyPrivateVoting {
     }
 
     #[private]
+    // TODO: fix to read the value of the delegations
     fn cast_delegated_vote(candidate: Field) {
         let mut options = NoteGetterOptions::new();
         options = options
