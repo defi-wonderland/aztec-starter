@@ -1,10 +1,10 @@
+use dep::authwit::cheatcodes as authwit_cheatcodes;
 use dep::aztec::{
     oracle::execution::get_contract_address,
     prelude::AztecAddress,
     test::helpers::{cheatcodes, test_environment::TestEnvironment},
 };
 use dep::token::Token;
-use dep::authwit::cheatcodes as authwit_cheatcodes;
 
 use crate::EasyPrivateVoting;
 
@@ -36,7 +36,14 @@ pub unconstrained fn setup() -> (&mut TestEnvironment, AztecAddress, AztecAddres
     (&mut env, voting_contract.to_address(), token_contract.to_address(), admin)
 }
 
-pub unconstrained fn prepare_token_balance_and_authwit(env: &mut TestEnvironment, voting_contract_address: AztecAddress, token_contract_address: AztecAddress, admin: AztecAddress, owner: AztecAddress, amount: U128) {
+pub unconstrained fn prepare_token_balance_and_authwit(
+    env: &mut TestEnvironment,
+    voting_contract_address: AztecAddress,
+    token_contract_address: AztecAddress,
+    admin: AztecAddress,
+    owner: AztecAddress,
+    amount: U128,
+) {
     prepare_token_balance(env, token_contract_address, admin, owner, amount);
     prepare_authwit(
         token_contract_address,
@@ -47,11 +54,15 @@ pub unconstrained fn prepare_token_balance_and_authwit(env: &mut TestEnvironment
     );
 }
 
-pub unconstrained fn prepare_token_balance(env: &mut TestEnvironment, token_contract_address: AztecAddress, admin: AztecAddress, owner: AztecAddress, amount: U128) {
+pub unconstrained fn prepare_token_balance(
+    env: &mut TestEnvironment,
+    token_contract_address: AztecAddress,
+    admin: AztecAddress,
+    owner: AztecAddress,
+    amount: U128,
+) {
     env.impersonate(admin);
-    Token::at(token_contract_address).mint_to_private(owner, owner, amount).call(
-        &mut env.private(),
-    );
+    Token::at(token_contract_address).mint_to_private(owner, owner, amount).call(&mut env.private());
     env.advance_block_by(1);
 }
 
