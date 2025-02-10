@@ -15,6 +15,13 @@ unconstrained fn test_initializer() {
 }
 
 #[test]
+unconstrained fn test_event() {
+    let (env, voting_contract_address, admin) = utils::setup();
+    env.impersonate(admin);
+    EasyPrivateVoting::at(voting_contract_address).cursed_method().call(&mut env.private());
+}
+
+#[test]
 unconstrained fn test_check_vote_status() {
     let (_, voting_contract_address, _) = utils::setup();
 

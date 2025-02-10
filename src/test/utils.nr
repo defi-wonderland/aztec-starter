@@ -6,9 +6,10 @@ pub unconstrained fn setup() -> (&mut TestEnvironment, AztecAddress, AztecAddres
     let mut env = TestEnvironment::new();
 
     let admin = env.create_account(0);
+    let contract_secret = 420;
 
     let initializer_call_interface = EasyPrivateVoting::interface().constructor(admin);
-    let voting_contract = env.deploy_self("EasyPrivateVoting").with_public_void_initializer(
+    let voting_contract = env.deploy_self_with_public_keys("EasyPrivateVoting", contract_secret).with_public_void_initializer(
         initializer_call_interface,
     );
 

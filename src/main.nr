@@ -4,10 +4,17 @@ use dep::aztec::macros::aztec;
 #[aztec]
 pub contract EasyPrivateVoting {
     use dep::aztec::{
+        encrypted_logs::log_assembly_strategies::default_aes128::event::encode_and_encrypt_event,
         keys::getters::get_public_keys,
-        macros::{functions::{initializer, internal, private, public}, storage::storage},
+        macros::{
+            events::event,
+            functions::{initializer, internal, private, public},
+            storage::storage,
+        },
+        protocol_types::traits::Serialize,
     };
     use dep::aztec::prelude::{AztecAddress, Map, PublicImmutable, PublicMutable};
+    use std::meta::derive;
     #[storage]
     struct Storage<Context> {
         admin: PublicMutable<AztecAddress, Context>, // admin can end vote
@@ -23,6 +30,22 @@ pub contract EasyPrivateVoting {
         storage.admin.write(admin);
         storage.vote_ended.write(false);
         storage.active_at_block.initialize(context.block_number() as u32);
+    }
+
+    #[derive(Serialize)]
+    #[event]
+    struct SomeEvent {
+        some_field: Field,
+    }
+
+    #[private]
+    fn cursed_method() {
+        let event = SomeEvent { some_field: 1 };
+        event.emit(encode_and_encrypt_event(
+            &mut context,
+            context.msg_sender(),
+            context.this_address(),
+        ));
     }
 
     #[private]
